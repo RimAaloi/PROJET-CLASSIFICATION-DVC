@@ -1,14 +1,25 @@
 stages:
   train:
-    # Dépendances du stage : si le script ou les données changent, ce stage est relancé
     deps:
       - src/train.py
       - data/fashion-mnist/fashion-mnist_train.csv
       - data/fashion-mnist/fashion-mnist_test.csv
-      
-    # La commande à exécuter (qui va lire les données et sauvegarder le modèle)
     cmd: python src/train.py
-    
-    # Les sorties : le modèle entraîné (sera versionné par DVC)
     outs:
       - models/fashion_classifier.keras
+      
+  evaluate:
+    # Dépendances : Le script, le modèle (sortie du stage 'train') et les données de test
+    deps:
+      - src/evaluate.py
+      - models/fashion_classifier.keras 
+      - data/fashion-mnist/fashion-mnist_test.csv
+      
+    # Commande à exécuter
+    cmd: python src/evaluate.py
+    
+    # Sorties : DVC tracke ces métriques. cache: False assure que le fichier JSON
+    # est stocké directement dans Git (car il est petit) et non dans S3.
+    metrics:
+      - metrics/metrics.json:
+          cache: False

@@ -20,3 +20,23 @@ stages:
       hash: md5
       md5: 532408768eb1f41ef7aad7ced7c1683b
       size: 6455248
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+    - path: data/fashion-mnist/fashion-mnist_test.csv
+      hash: md5
+      md5: 64ec16a6b73b3514634d529a71dd8306
+      size: 22176691
+    - path: models/fashion_classifier.keras
+      hash: md5
+      md5: 532408768eb1f41ef7aad7ced7c1683b
+      size: 6455248
+    - path: src/evaluate.py
+      hash: md5
+      md5: fb87bf90e29ed765d33dd39b41c620a8
+      size: 1837
+    outs:
+    - path: metrics/metrics.json
+      hash: md5
+      md5: 2ffbfcbe44672bc89a213b3506b6bb4d
+      size: 88
