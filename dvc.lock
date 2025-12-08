@@ -1,0 +1,22 @@
+schema: '2.0'
+stages:
+  train:
+    cmd: python src/train.py
+    deps:
+    - path: data/fashion-mnist/fashion-mnist_test.csv
+      hash: md5
+      md5: 64ec16a6b73b3514634d529a71dd8306
+      size: 22176691
+    - path: data/fashion-mnist/fashion-mnist_train.csv
+      hash: md5
+      md5: 976229da8a00a3ccf41b8009e4e48d77
+      size: 133047193
+    - path: src/train.py
+      hash: md5
+      md5: 787a5cad3eeaa9152338f994d3c25f10
+      size: 2559
+    outs:
+    - path: models/fashion_classifier.keras
+      hash: md5
+      md5: 532408768eb1f41ef7aad7ced7c1683b
+      size: 6455248

@@ -11,3 +11,4 @@ metrics/
 # Ignorer les dossiers créés par votre OS ou IDE
 .DS_Store
 *.pyc
+/data
