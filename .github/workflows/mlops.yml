@@ -85,7 +85,7 @@ jobs:
           cml-publish metrics/plots/confusion_matrix_cnn.png --md >> report.md
 
           # 4. Publier le rapport (CML gère si c'est une PR ou un simple commit)
-          cml-send-comment < report.md
+          cml-send-comment --file report.md
           
       # ------------------------------------------------------------------
       # ÉTAPE FINALE : COMMIT ET PUSH DES ARTEFACTS MIS À JOUR
