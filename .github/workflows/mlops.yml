@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  # Déclencheur supplémentaire : S'exécute lors de l'ouverture d'une Pull Request
   pull_request:
     branches:
       - main 
@@ -28,13 +27,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          
+      - name: Setup Node.js (for CML) # AJOUT NÉCESSAIRE
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
       - name: Install Dependencies (DVC + CML + ML)
         run: |
           pip install --upgrade pip
           pip install dvc[s3]
           pip install -r requirements.txt
-          pip install cml --upgrade --no-cache-dir
+          # Installation CML via NPM (la méthode stable)
+          npm install -g @dvcorg/cml
+          # Installation de 'jq' pour l'extraction de métriques JSON
+          sudo apt-get install -y jq 
 
       - name: Pull Data and Models from S3
         run: dvc pull -r ${{ env.DVC_REMOTE_NAME }}
@@ -48,14 +55,14 @@ jobs:
           dvc push -r ${{ env.DVC_REMOTE_NAME }}
           
       # ------------------------------------------------------------------
-      # NOUVELLE ÉTAPE CML : GÉNERATION DU RAPPORT
+      # ÉTAPE CML : GÉNERATION DU RAPPORT
       # ------------------------------------------------------------------
       - name: Generate CML Report
         env:
+          # TOKEN CML
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 1. Obtenir les métriques et les comparer à la version précédente (si push sur main)
-          # Utilisation de 'jq' pour extraire les métriques du fichier JSON
+          # 1. Obtenir les métriques et les comparer à la version précédente
           ACCURACY_MLP=$(jq -r '.simple_mlp.accuracy' metrics/metrics.json)
           ACCURACY_CNN=$(jq -r '.cnn.accuracy' metrics/metrics.json)
           ACCURACY_TL=$(jq -r '.transfer_learning.accuracy' metrics/metrics.json)
@@ -72,12 +79,12 @@ jobs:
           echo "CNN | ${ACCURACY_CNN} | $(jq -r '.cnn."f1_score"' metrics/metrics.json)" >> report.md
           echo "Transfer Learning | ${ACCURACY_TL} | $(jq -r '.transfer_learning."f1_score"' metrics/metrics.json)" >> report.md
           
-          # 3. Ajout des graphiques de confusion (CML insère les images directement)
+          # 3. Ajout des graphiques de confusion
           echo "### 🖼️ Matrices de Confusion" >> report.md
           cml-publish metrics/plots/confusion_matrix_transfer_learning.png --md >> report.md
           cml-publish metrics/plots/confusion_matrix_cnn.png --md >> report.md
 
-          # 4. Publier le rapport dans la PR (si c'est une PR) ou comme un commentaire (si c'est un push sur main)
+          # 4. Publier le rapport (CML gère si c'est une PR ou un simple commit)
           cml-send-comment < report.md
           
       # ------------------------------------------------------------------
@@ -94,4 +101,4 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref_name }} # Push vers la branche actuelle
+          branch: ${{ github.ref_name }}
