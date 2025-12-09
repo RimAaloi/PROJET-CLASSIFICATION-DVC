@@ -101,15 +101,16 @@ jobs:
           echo ":--- | :--- | :---" >> report.md
           echo "Simple MLP | $ACCURACY_MLP | $F1_MLP" >> report.md
           echo "CNN | $ACCURACY_CNN | $F1_CNN" >> report.md
-          echo "Transfer Learning | $ACCURACY_TL | $F1_TL" >> report.md
-
+          echo "Transfer Learning | $ACCURACY_TL | $F1_TL" >> report.md 
+          
+          
           echo "### 🖼️ Matrices de confusion" >> report.md
-          cml-publish metrics/plots/confusion_matrix_simple_mlp.png --md >> report.md
-          cml-publish metrics/plots/confusion_matrix_cnn.png --md >> report.md
-          cml-publish metrics/plots/confusion_matrix_transfer_learning.png --md >> report.md
+          echo "![inline](metrics/plots/confusion_matrix_simple_mlp.png)" >> report.md
+          echo "![inline](metrics/plots/confusion_matrix_cnn.png)" >> report.md
+          echo "![inline](metrics/plots/confusion_matrix_transfer_learning.png)" >> report.md
 
-          # Publish the report as a PR comment or workflow summary
-          cml comment create --file report.md
+          # Publier le rapport comme commentaire PR
+          cml comment create report.md
 
       # ---------------------------------------------------------
       # 9) GIT COMMIT & PUSH
