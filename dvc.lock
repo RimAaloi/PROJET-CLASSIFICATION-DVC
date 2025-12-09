@@ -29,37 +29,37 @@ stages:
       size: 22176691
     - path: models/cnn_model.keras
       hash: md5
-      md5: ae0ea402b45ebfce5dca448160bd729c
-      size: 2196477
+      md5: 81e53a920366b1aec2463595312f1da2
+      size: 2196491
     - path: models/fashion_classifier.keras
       hash: md5
-      md5: 532408768eb1f41ef7aad7ced7c1683b
-      size: 6455248
+      md5: ea1a1b1347981a2de1808f61317a280a
+      size: 6455254
     - path: models/transfer_model.keras
       hash: md5
-      md5: 3293eaa0c21e29a5457aad3abe92e501
-      size: 8712362
+      md5: ce6f00cda3f4c249446f2d6109536b2c
+      size: 8712672
     - path: src/evaluate.py
       hash: md5
-      md5: c9bffbe171f6335df2ae90d5b9b7a956
-      size: 4529
+      md5: 13b496b3907bcee842637ea0a006d229
+      size: 4421
     outs:
     - path: metrics/metrics.json
       hash: md5
-      md5: fe6a12df932782449477b0a9bb83c6ed
-      size: 513
+      md5: a5c211d9542f6bdedef1cbfc0b119c16
+      size: 494
     - path: metrics/plots/confusion_matrix_cnn.png
       hash: md5
-      md5: 547e1d3acab3b13b2f5ce42956128a9b
-      size: 56235
+      md5: 41753321b71bd1055c0c2c5cef18da93
+      size: 62360
     - path: metrics/plots/confusion_matrix_simple_mlp.png
       hash: md5
-      md5: 41656f4ec64c7f03e811d2ca74b60fb2
-      size: 59290
+      md5: fbf496788b9cffb3ecdefca6e438106b
+      size: 64987
     - path: metrics/plots/confusion_matrix_transfer_learning.png
       hash: md5
-      md5: e45cc57ab0b7fa0bceac90de1a4befba
-      size: 60701
+      md5: 6cae9a251c7106402ec845c3fd519dce
+      size: 66168
   train_cnn:
     cmd: python src/train_cnn.py
     deps:
@@ -69,13 +69,13 @@ stages:
       size: 133047193
     - path: src/train_cnn.py
       hash: md5
-      md5: 5f8017e4bd446bb4e9114033721580ba
-      size: 2437
+      md5: 8b2616b716d0ea8f7dd03d3f8bbc3ca9
+      size: 2373
     outs:
     - path: models/cnn_model.keras
       hash: md5
-      md5: ae0ea402b45ebfce5dca448160bd729c
-      size: 2196477
+      md5: 81e53a920366b1aec2463595312f1da2
+      size: 2196491
   train_transfer:
     cmd: python src/train_transfer.py
     deps:
@@ -85,13 +85,13 @@ stages:
       size: 133047193
     - path: src/train_transfer.py
       hash: md5
-      md5: e438534de4f7b7754c375c5dc04ebfaf
-      size: 3417
+      md5: c7a8fdcdda9ee27e98dcf24c8b467489
+      size: 3310
     outs:
     - path: models/transfer_model.keras
       hash: md5
-      md5: 3293eaa0c21e29a5457aad3abe92e501
-      size: 8712362
+      md5: ce6f00cda3f4c249446f2d6109536b2c
+      size: 8712672
   train_simple:
     cmd: python src/train.py
     deps:
@@ -105,10 +105,10 @@ stages:
       size: 133047193
     - path: src/train.py
       hash: md5
-      md5: 787a5cad3eeaa9152338f994d3c25f10
-      size: 2559
+      md5: 412a595dd9fa9a3297160f9bd10ba53a
+      size: 2499
     outs:
     - path: models/fashion_classifier.keras
       hash: md5
-      md5: 532408768eb1f41ef7aad7ced7c1683b
-      size: 6455248
+      md5: ea1a1b1347981a2de1808f61317a280a
+      size: 6455254
