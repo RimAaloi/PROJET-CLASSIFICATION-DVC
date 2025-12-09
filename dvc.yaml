@@ -1,5 +1,5 @@
 stages:
-  train:
+  train_simple:
     deps:
       - src/train.py
       - data/fashion-mnist/fashion-mnist_train.csv
@@ -8,18 +8,44 @@ stages:
     outs:
       - models/fashion_classifier.keras
       
+  train_cnn:
+    deps:
+      - src/train_cnn.py
+      - data/fashion-mnist/fashion-mnist_train.csv
+    cmd: python src/train_cnn.py
+    outs:
+      - models/cnn_model.keras
+
+  train_transfer:
+    deps:
+      - src/train_transfer.py
+      - data/fashion-mnist/fashion-mnist_train.csv
+    cmd: python src/train_transfer.py
+    outs:
+      - models/transfer_model.keras
+
   evaluate:
-    # Dépendances : Le script, le modèle (sortie du stage 'train') et les données de test
     deps:
       - src/evaluate.py
+      # Dépendances sur les 3 modèles pour la comparaison
       - models/fashion_classifier.keras 
+      - models/cnn_model.keras
+      - models/transfer_model.keras
       - data/fashion-mnist/fashion-mnist_test.csv
       
-    # Commande à exécuter
     cmd: python src/evaluate.py
     
-    # Sorties : DVC tracke ces métriques. cache: False assure que le fichier JSON
-    # est stocké directement dans Git (car il est petit) et non dans S3.
     metrics:
       - metrics/metrics.json:
+          cache: False # Stocké dans Git
+          
+    plots:
+      - metrics/plots/confusion_matrix_simple_mlp.png:
           cache: False
+          template: confusion
+      - metrics/plots/confusion_matrix_cnn.png:
+          cache: False
+          template: confusion
+      - metrics/plots/confusion_matrix_transfer_learning.png:
+          cache: False
+          template: confusion
