@@ -69,7 +69,7 @@ jobs:
       # 8) Generate CML report
       - name: Generate CML report
         env:
-          REPO_TOKEN: ${{ secrets.GH_PAT }}  # Nécessaire pour poster les commentaires
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ACCURACY_MLP=$(jq -r '.simple_mlp.accuracy' metrics/metrics.json)
           ACCURACY_CNN=$(jq -r '.cnn.accuracy' metrics/metrics.json)
