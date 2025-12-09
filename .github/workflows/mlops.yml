@@ -1,4 +1,4 @@
-name: MLOps Pipeline DVC CI/CD
+name: MLOps DVC + CML Pipeline
 
 on:
   push:
@@ -6,99 +6,118 @@ on:
       - main
   pull_request:
     branches:
-      - main 
-      
+      - main
+
 jobs:
   run-dvc-pipeline:
     runs-on: ubuntu-latest
-    
+
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       DVC_REMOTE_NAME: s3_remote
+      REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - name: Checkout Repository
+
+      # ---------------------------------------------------------
+      # 1) CHECKOUT CODE
+      # ---------------------------------------------------------
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
 
+      # ---------------------------------------------------------
+      # 2) PYTHON
+      # ---------------------------------------------------------
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          
-      - name: Setup Node.js (for CML) # AJOUT NÉCESSAIRE
+          python-version: "3.11"
+
+      # ---------------------------------------------------------
+      # 3) NODE / CML
+      # ---------------------------------------------------------
+      - name: Setup Node (for CML)
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
-      - name: Install Dependencies (DVC + CML + ML)
+      # ---------------------------------------------------------
+      # 4) INSTALL DEPENDENCIES
+      # ---------------------------------------------------------
+      - name: Install dependencies (DVC + ML + CML)
         run: |
           pip install --upgrade pip
           pip install dvc[s3]
           pip install -r requirements.txt
-          # Installation CML via NPM (la méthode stable)
-          npm install -g @dvcorg/cml
-          # Installation de 'jq' pour l'extraction de métriques JSON
-          sudo apt-get install -y jq 
 
-      - name: Pull Data and Models from S3
-        run: dvc pull -r ${{ env.DVC_REMOTE_NAME }}
-        
-      - name: Run Full DVC Pipeline (dvc repro)
+          # Install CML
+          npm install -g @dvcorg/cml
+
+          # Install jq (JSON extractor)
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      # ---------------------------------------------------------
+      # 5) PULL DATA & MODELS
+      # ---------------------------------------------------------
+      - name: Pull data & models from DVC remote (S3)
+        run: dvc pull -r $DVC_REMOTE_NAME
+
+      # ---------------------------------------------------------
+      # 6) RUN DVC PIPELINE
+      # ---------------------------------------------------------
+      - name: Run DVC pipeline
         run: dvc repro
 
-      - name: Track Metrics Changes and Save Artifacts
+      # ---------------------------------------------------------
+      # 7) PUSH UPDATED ARTIFACTS
+      # ---------------------------------------------------------
+      - name: Push new artifacts to DVC remote
         run: |
           dvc commit
-          dvc push -r ${{ env.DVC_REMOTE_NAME }}
-          
-      # ------------------------------------------------------------------
-      # ÉTAPE CML : GÉNERATION DU RAPPORT
-      # ------------------------------------------------------------------
-      - name: Generate CML Report
-        env:
-          # TOKEN CML
-          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          dvc push -r $DVC_REMOTE_NAME
+
+      # ---------------------------------------------------------
+      # 8) GENERATE REPORT WITH CML
+      # ---------------------------------------------------------
+      - name: Generate CML report
         run: |
-          # 1. Obtenir les métriques et les comparer à la version précédente
           ACCURACY_MLP=$(jq -r '.simple_mlp.accuracy' metrics/metrics.json)
           ACCURACY_CNN=$(jq -r '.cnn.accuracy' metrics/metrics.json)
           ACCURACY_TL=$(jq -r '.transfer_learning.accuracy' metrics/metrics.json)
-          
-          # 2. Création du fichier Markdown (rapport)
-          echo "## 📊 Rapport d'Exécution du Pipeline MLOps" > report.md
-          echo "Pipeline DVC exécuté avec succès. Les modèles et les données sont versionnés sur S3." >> report.md
-          
-          # Ajout du tableau de comparaison
-          echo "### 📈 Performances des Modèles" >> report.md
-          echo "Modele | Accuracy | F1-Score" >> report.md
+
+          F1_MLP=$(jq -r '.simple_mlp.f1_score' metrics/metrics.json)
+          F1_CNN=$(jq -r '.cnn.f1_score' metrics/metrics.json)
+          F1_TL=$(jq -r '.transfer_learning.f1_score' metrics/metrics.json)
+
+          echo "## 📊 Rapport d'exécution du pipeline MLOps" > report.md
+          echo "Pipeline exécuté avec succès via GitHub Actions." >> report.md
+
+          echo "### 📈 Performances des modèles" >> report.md
+          echo "Modèle | Accuracy | F1-score" >> report.md
           echo ":--- | :--- | :---" >> report.md
-          echo "Simple MLP | ${ACCURACY_MLP} | $(jq -r '.simple_mlp."f1_score"' metrics/metrics.json)" >> report.md
-          echo "CNN | ${ACCURACY_CNN} | $(jq -r '.cnn."f1_score"' metrics/metrics.json)" >> report.md
-          echo "Transfer Learning | ${ACCURACY_TL} | $(jq -r '.transfer_learning."f1_score"' metrics/metrics.json)" >> report.md
-          
-          # 3. Ajout des graphiques de confusion
-          echo "### 🖼️ Matrices de Confusion" >> report.md
-          cml-publish metrics/plots/confusion_matrix_transfer_learning.png --md >> report.md
+          echo "Simple MLP | $ACCURACY_MLP | $F1_MLP" >> report.md
+          echo "CNN | $ACCURACY_CNN | $F1_CNN" >> report.md
+          echo "Transfer Learning | $ACCURACY_TL | $F1_TL" >> report.md
+
+          echo "### 🖼️ Matrices de confusion" >> report.md
+          cml-publish metrics/plots/confusion_matrix_simple_mlp.png --md >> report.md
           cml-publish metrics/plots/confusion_matrix_cnn.png --md >> report.md
+          cml-publish metrics/plots/confusion_matrix_transfer_learning.png --md >> report.md
 
-          # 4. Publier le rapport (CML gère si c'est une PR ou un simple commit)
+          # Publish the report as a PR comment or workflow summary
           cml-send-comment --file report.md
-          
-      # ------------------------------------------------------------------
-      # ÉTAPE FINALE : COMMIT ET PUSH DES ARTEFACTS MIS À JOUR
-      # ------------------------------------------------------------------
-      - name: Commit Metrics and Plots to Git
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add dvc.lock metrics/metrics.json metrics/plots/
-          git commit -m "ci: Update DVC pipeline metrics, plots, and lock file [skip ci]" || echo "No changes to commit"
 
-      - name: Push Code and Metrics to GitHub
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref_name }}
+      # ---------------------------------------------------------
+      # 9) GIT COMMIT & PUSH
+      # ---------------------------------------------------------
+      - name: Commit and push updated metrics
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add dvc.lock metrics/metrics.json metrics/plots/
+          git commit -m "ci: update metrics and plots [skip ci]" || echo "No changes"
+          git push
