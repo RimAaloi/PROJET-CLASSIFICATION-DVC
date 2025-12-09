@@ -34,7 +34,7 @@ jobs:
           pip install --upgrade pip
           pip install dvc[s3]
           pip install -r requirements.txt
-          pip install cml # Installation de CML
+          pip install cml --upgrade --no-cache-dir
 
       - name: Pull Data and Models from S3
         run: dvc pull -r ${{ env.DVC_REMOTE_NAME }}
