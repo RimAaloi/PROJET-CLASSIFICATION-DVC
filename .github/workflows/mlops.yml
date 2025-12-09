@@ -109,7 +109,7 @@ jobs:
           cml-publish metrics/plots/confusion_matrix_transfer_learning.png --md >> report.md
 
           # Publish the report as a PR comment or workflow summary
-          cml-send-comment --file report.md
+          cml comment create --file report.md
 
       # ---------------------------------------------------------
       # 9) GIT COMMIT & PUSH
