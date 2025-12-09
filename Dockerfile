@@ -5,15 +5,23 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # 3. Copier le fichier des dépendances et installer toutes les librairies
-# Ce processus installe DVC, dvc-s3, TensorFlow, scikit-learn, etc., à partir de votre liste figée.
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt --timeout 1000
 
 # 4. Copier le reste du code source et les fichiers de configuration DVC
-# Cela inclut src/, dvc.yaml, .dvc/config et les pointeurs de données (.dvc)
 COPY . .
 
 # 5. Définir les identifiants AWS comme variables d'environnement (CRUCIAL pour DVC S3)
-# Ces variables permettent à DVC (via la librairie boto3) d'accéder à votre bucket S3.
-# Optionnel : définir dvc comme point d'entrée pour lancer les commandes facilement
+# Les valeurs seront injectées SÉCURISÉMENT lors de l'exécution (docker run -e...).
+ENV AWS_ACCESS_KEY_ID=""
+ENV AWS_SECRET_ACCESS_KEY=""
+
+# 6. Définir le répertoire de données comme volume (bonne pratique DVC)
+VOLUME /app/data
+
+# 7. Définir DVC comme point d'entrée pour toutes les commandes.
 ENTRYPOINT ["dvc"]
+
+# 8. Commande par défaut : exécuter 'repro'. Si l'utilisateur tape 'docker run <image> pull',
+# cela devient 'dvc pull'.
+CMD ["repro"]

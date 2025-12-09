@@ -1,0 +1,97 @@
+name: MLOps Pipeline DVC CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  # Déclencheur supplémentaire : S'exécute lors de l'ouverture d'une Pull Request
+  pull_request:
+    branches:
+      - main 
+      
+jobs:
+  run-dvc-pipeline:
+    runs-on: ubuntu-latest
+    
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      DVC_REMOTE_NAME: s3_remote
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies (DVC + CML + ML)
+        run: |
+          pip install --upgrade pip
+          pip install dvc[s3]
+          pip install -r requirements.txt
+          pip install cml # Installation de CML
+
+      - name: Pull Data and Models from S3
+        run: dvc pull -r ${{ env.DVC_REMOTE_NAME }}
+        
+      - name: Run Full DVC Pipeline (dvc repro)
+        run: dvc repro
+
+      - name: Track Metrics Changes and Save Artifacts
+        run: |
+          dvc commit
+          dvc push -r ${{ env.DVC_REMOTE_NAME }}
+          
+      # ------------------------------------------------------------------
+      # NOUVELLE ÉTAPE CML : GÉNERATION DU RAPPORT
+      # ------------------------------------------------------------------
+      - name: Generate CML Report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 1. Obtenir les métriques et les comparer à la version précédente (si push sur main)
+          # Utilisation de 'jq' pour extraire les métriques du fichier JSON
+          ACCURACY_MLP=$(jq -r '.simple_mlp.accuracy' metrics/metrics.json)
+          ACCURACY_CNN=$(jq -r '.cnn.accuracy' metrics/metrics.json)
+          ACCURACY_TL=$(jq -r '.transfer_learning.accuracy' metrics/metrics.json)
+          
+          # 2. Création du fichier Markdown (rapport)
+          echo "## 📊 Rapport d'Exécution du Pipeline MLOps" > report.md
+          echo "Pipeline DVC exécuté avec succès. Les modèles et les données sont versionnés sur S3." >> report.md
+          
+          # Ajout du tableau de comparaison
+          echo "### 📈 Performances des Modèles" >> report.md
+          echo "Modele | Accuracy | F1-Score" >> report.md
+          echo ":--- | :--- | :---" >> report.md
+          echo "Simple MLP | ${ACCURACY_MLP} | $(jq -r '.simple_mlp."f1_score"' metrics/metrics.json)" >> report.md
+          echo "CNN | ${ACCURACY_CNN} | $(jq -r '.cnn."f1_score"' metrics/metrics.json)" >> report.md
+          echo "Transfer Learning | ${ACCURACY_TL} | $(jq -r '.transfer_learning."f1_score"' metrics/metrics.json)" >> report.md
+          
+          # 3. Ajout des graphiques de confusion (CML insère les images directement)
+          echo "### 🖼️ Matrices de Confusion" >> report.md
+          cml-publish metrics/plots/confusion_matrix_transfer_learning.png --md >> report.md
+          cml-publish metrics/plots/confusion_matrix_cnn.png --md >> report.md
+
+          # 4. Publier le rapport dans la PR (si c'est une PR) ou comme un commentaire (si c'est un push sur main)
+          cml-send-comment < report.md
+          
+      # ------------------------------------------------------------------
+      # ÉTAPE FINALE : COMMIT ET PUSH DES ARTEFACTS MIS À JOUR
+      # ------------------------------------------------------------------
+      - name: Commit Metrics and Plots to Git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add dvc.lock metrics/metrics.json metrics/plots/
+          git commit -m "ci: Update DVC pipeline metrics, plots, and lock file [skip ci]" || echo "No changes to commit"
+
+      - name: Push Code and Metrics to GitHub
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref_name }} # Push vers la branche actuelle
