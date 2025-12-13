@@ -1,11 +1,11 @@
-# 👗 Projet Classification Fashion-MNIST avec DVC + MLOps
+#  Projet Classification Fashion-MNIST avec DVC + MLOps
 
 [![MLOps Pipeline](https://github.com/RimAaloi/PROJET-CLASSIFICATION-DVC/actions/workflows/mlops.yml/badge.svg)](https://github.com/RimAaloi/PROJET-CLASSIFICATION-DVC/actions)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
 [![DVC](https://img.shields.io/badge/dvc-3.64.2-blue.svg)](https://dvc.org/)
 [![TensorFlow](https://img.shields.io/badge/tensorflow-2.x-orange.svg)](https://www.tensorflow.org/)
 
-## 📋 Table des matières
+##  Table des matières
 
 - [Description du projet](#description-du-projet)
 - [Architecture et pipeline](#architecture-et-pipeline)
@@ -20,7 +20,7 @@
 
 ---
 
-## 🎯 Description du projet
+##  Description du projet
 
 Ce projet met en œuvre une **pipeline MLOps complète** pour la classification d'images du dataset **Fashion-MNIST** en utilisant trois approches différentes :
 
@@ -30,14 +30,14 @@ Ce projet met en œuvre une **pipeline MLOps complète** pour la classification 
 
 Le projet utilise **DVC (Data Version Control)** pour gérer les données, les modèles et les artefacts, et **GitHub Actions + CML** pour automatiser et rapporter les résultats du pipeline.
 
-### 🎨 Dataset
+###  Dataset
 - **Dataset** : Fashion-MNIST (60,000 images d'entraînement, 10,000 de test)
 - **Classes** : 10 (T-shirt, Pantalon, Pull, Robe, Manteau, Sandal, Chemise, Sneaker, Sac, Botte)
 - **Format d'image** : 28×28 pixels en niveaux de gris
 
 ---
 
-## 🏗️ Architecture et pipeline
+##  Architecture et pipeline
 
 ### Vue d'ensemble
 ```
@@ -63,7 +63,7 @@ Data (Fashion-MNIST)
 
 ---
 
-## 🚀 Installation
+##  Installation
 
 ### Prérequis
 - Python 3.11+
@@ -108,7 +108,7 @@ dvc pull
 
 ---
 
-## 💻 Utilisation
+##  Utilisation
 
 ### Option 1 : Exécuter l'intégralité du pipeline
 ```bash
@@ -154,7 +154,7 @@ git push
 
 ---
 
-## 📁 Structure du projet
+##  Structure du projet
 
 ```
 PROJET-CLASSIFICATION-DVC/
@@ -195,7 +195,7 @@ PROJET-CLASSIFICATION-DVC/
 
 ---
 
-## 🧠 Modèles d'apprentissage
+##  Modèles d'apprentissage
 
 ### 1. **Simple MLP (Multi-Layer Perceptron)**
 **Fichier** : `src/train.py`
@@ -257,7 +257,7 @@ Model: MobileNetV2 (pré-entraîné)
 
 ---
 
-## 🔄 Méthodologie DVC
+##  Méthodologie DVC
 
 ### Qu'est-ce que DVC ?
 DVC (Data Version Control) permet de :
@@ -315,7 +315,7 @@ dvc pull
 
 ---
 
-## 🔄 Pipeline MLOps (GitHub Actions + CML)
+##  Pipeline MLOps (GitHub Actions + CML)
 
 ### Automatisation avec GitHub Actions
 
@@ -333,7 +333,7 @@ Le fichier `.github/workflows/mlops.yml` automatise :
 Après chaque `git push`, un commentaire est ajouté à votre PR contenant :
 
 ```markdown
-## 📊 Rapport d'exécution du pipeline MLOps
+##  Rapport d'exécution du pipeline MLOps
 
 | Modèle | Accuracy | F1-score |
 |--------|----------|----------|
@@ -341,13 +341,13 @@ Après chaque `git push`, un commentaire est ajouté à votre PR contenant :
 | CNN | 97.1% | 0.971 |
 | Transfer Learning | 98.5% | 0.985 |
 
-### 🖼️ Matrices de confusion
+###  Matrices de confusion
 [Images des matrices de confusion]
 ```
 
 ---
 
-## 📊 Résultats et métriques
+##  Résultats et métriques
 
 ### Métriques JSON (`metrics/metrics.json`)
 
@@ -385,7 +385,7 @@ Après chaque `git push`, un commentaire est ajouté à votre PR contenant :
 
 ---
 
-## 🐳 Utilisation avec Docker
+##  Utilisation avec Docker
 
 ### Construire l'image
 ```bash
@@ -403,7 +403,7 @@ docker run --rm \
 
 ---
 
-## 🔐 Secrets GitHub Actions
+##  Secrets GitHub Actions
 
 Pour que le pipeline fonctionne avec le stockage S3, ajoutez les secrets :
 
@@ -416,7 +416,7 @@ Le `GITHUB_TOKEN` est fourni automatiquement par GitHub.
 
 ---
 
-## 📚 Dépendances principales
+##  Dépendances principales
 
 | Package | Version | Usage |
 |---------|---------|-------|
@@ -429,7 +429,7 @@ Le `GITHUB_TOKEN` est fourni automatiquement par GitHub.
 
 ---
 
-## 🤝 Contribution
+##  Contribution
 
 Pour contribuer au projet :
 
@@ -442,13 +442,13 @@ Pour contribuer au projet :
 
 ---
 
-## 📝 Licence
+##  Licence
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 ---
 
-## 👤 Auteur
+##  Auteur
 
 **Rim Aaloi**
 - GitHub : [@RimAaloi](https://github.com/RimAaloi)
@@ -456,7 +456,7 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 ---
 
-## 📞 Support
+##  Support
 
 Pour toute question ou problème :
 - Ouvrez une [Issue](https://github.com/RimAaloi/PROJET-CLASSIFICATION-DVC/issues)
@@ -464,7 +464,7 @@ Pour toute question ou problème :
 
 ---
 
-## 🎓 Ressources d'apprentissage
+##  Ressources d'apprentissage
 
 - [DVC Documentation](https://dvc.org/doc)
 - [CML Documentation](https://cml.dev/)
