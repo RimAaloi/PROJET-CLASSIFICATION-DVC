@@ -1,17 +1,17 @@
 {
     "simple_mlp": {
-        "accuracy": 0.8446,
-        "f1_score": 0.8435,
-        "confusion_matrix_plot": "metrics\\plots\\confusion_matrix_simple_mlp.png"
+        "accuracy": 0.8521,
+        "f1_score": 0.8495,
+        "confusion_matrix_plot": "metrics/plots/confusion_matrix_simple_mlp.png"
     },
     "cnn": {
-        "accuracy": 0.9027,
-        "f1_score": 0.9022,
-        "confusion_matrix_plot": "metrics\\plots\\confusion_matrix_cnn.png"
+        "accuracy": 0.899,
+        "f1_score": 0.9009,
+        "confusion_matrix_plot": "metrics/plots/confusion_matrix_cnn.png"
     },
     "transfer_learning": {
-        "accuracy": 0.8464,
-        "f1_score": 0.8468,
-        "confusion_matrix_plot": "metrics\\plots\\confusion_matrix_transfer_learning.png"
+        "accuracy": 0.8479,
+        "f1_score": 0.8485,
+        "confusion_matrix_plot": "metrics/plots/confusion_matrix_transfer_learning.png"
     }
 }
